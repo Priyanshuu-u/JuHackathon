@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark, cupcake;
+
+  --color-cherry=oklch(89% 0.058 10.001)
+}

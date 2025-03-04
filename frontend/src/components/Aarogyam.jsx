@@ -1,11 +1,13 @@
-import React from 'react'
+import React from 'react';
+import AIChat from './AIChat';
 
 function Aarogyam() {
   return (
     <div>
-      Aarogyam
+      <h1>Aarogyam</h1>
+      <AIChat />
     </div>
-  )
+  );
 }
 
-export default Aarogyam
+export default Aarogyam;

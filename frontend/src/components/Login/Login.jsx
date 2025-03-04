@@ -24,9 +24,10 @@ const Login = () => {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+     
       if (response.ok) {
         // Save user details and token in localStorage
+         const result = await response.json();
         localStorage.setItem("user", JSON.stringify(result.user));
         localStorage.setItem("userToken", result.token);
 

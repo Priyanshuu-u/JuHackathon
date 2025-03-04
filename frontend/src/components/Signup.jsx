@@ -22,7 +22,7 @@ const Signup = () => {
   formData.append("photo", selectedFile);
 
   try {
-    const response = await fetch("https://ju-frontend.onrender.com/signup", {
+    const response = await fetch("https://ju-backend.onrender.com/signup", {
       method: "POST",
       body: formData,
     });
@@ -30,10 +30,14 @@ const Signup = () => {
     if (response.ok) {
       const text = await response.text();
       const result = text ? JSON.parse(text) : {};
-      localStorage.setItem("user", JSON.stringify(result.user));
-      localStorage.setItem("userToken", result.token);
-      toast.success(`Welcome ${result.user.name}`, { position: "top-right" });
-      navigate("/home");
+      if (result.user) {
+        localStorage.setItem("user", JSON.stringify(result.user));
+        localStorage.setItem("userToken", result.token);
+        toast.success(`Welcome ${result.user.name}`, { position: "top-right" });
+        navigate("/home");
+      } else {
+        toast.error("Invalid response from server.");
+      }
     } else {
       toast.error("Something went wrong!");
     }

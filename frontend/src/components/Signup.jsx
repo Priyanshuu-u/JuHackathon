@@ -27,8 +27,9 @@ const Signup = () => {
         body: formData,
       });
 
-      const result = await response.json();
+     
       if (response.ok) {
+         const result = await response.json();
         // Store user details in localStorage
         localStorage.setItem("user", JSON.stringify(result.user)); // Store user data
         localStorage.setItem("userToken", result.token); // Store the token

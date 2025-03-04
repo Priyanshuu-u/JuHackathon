@@ -6,7 +6,7 @@ function About() {
     {
       name: "Priyanshu Rajpurohit",
       college: "JECRC College(B.Tech CSE)",
-      photo: "https://media.licdn.com/dms/image/v2/D5603AQHUimQR_Slplw/profile-displayphoto-shrink_200_200/B56ZRHG0mjGsAY-/0/1736359759263?e=2147483647&v=beta&t=Mz_iiKDbfvMQCd6ffB2o0HHrmRX-799p0WrbqS99Gis", // Replace with actual photo URL
+      photo: "https://media.licdn.com/dms/image/v2/D5635AQEbPW1vyAodRA/profile-framedphoto-shrink_400_400/B56ZVCio.8GoAc-/0/1740578132267?e=1741716000&v=beta&t=e5oAz9WvvlaeTADIT6pnREtOGs-oJok1zeIxUk-5H2s", // Replace with actual photo URL
     },
     {
       name: "Arpit Pareek",

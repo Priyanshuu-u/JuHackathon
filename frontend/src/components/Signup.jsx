@@ -13,42 +13,35 @@ const Signup = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", e.target.name.value);
-    formData.append("email", e.target.email.value);
-    formData.append("password", e.target.password.value);
-    formData.append("role", e.target.role.value);
-    formData.append("photo", selectedFile);
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append("name", e.target.name.value);
+  formData.append("email", e.target.email.value);
+  formData.append("password", e.target.password.value);
+  formData.append("role", e.target.role.value);
+  formData.append("photo", selectedFile);
 
-    try {
-      const response = await fetch("https://ju-frontend.onrender.com/signup", {
-        method: "POST",
-        body: formData,
-      });
+  try {
+    const response = await fetch("https://ju-frontend.onrender.com/signup", {
+      method: "POST",
+      body: formData,
+    });
 
-     
-      if (response.ok) {
-         const result = await response.json();
-        // Store user details in localStorage
-        localStorage.setItem("user", JSON.stringify(result.user)); // Store user data
-        localStorage.setItem("userToken", result.token); // Store the token
-
-        // Show success toast with the correct position
-        toast.success(`Welcome ${result.user.name}`, {
-          position: "top-right", // Use string position directly
-        });
-
-        navigate("/home"); // Redirect to Home
-      } else {
-        toast.error("Something went wrong!");
-      }
-    } catch (error) {
-      console.error("Error during signup:", error);
+    if (response.ok) {
+      const text = await response.text();
+      const result = text ? JSON.parse(text) : {};
+      localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.setItem("userToken", result.token);
+      toast.success(`Welcome ${result.user.name}`, { position: "top-right" });
+      navigate("/home");
+    } else {
       toast.error("Something went wrong!");
     }
-  };
-
+  } catch (error) {
+    console.error("Error during signup:", error);
+    toast.error("Something went wrong!");
+  }
+};
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{
       backgroundImage: `url('https://static.vecteezy.com/system/resources/previews/004/449/782/non_2x/abstract-geometric-medical-cross-shape-medicine-and-science-concept-background-medicine-medical-health-cross-healthcare-decoration-for-flyers-poster-web-banner-and-card-illustration-vector.jpg')`,

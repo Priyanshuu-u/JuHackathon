@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "./Navbar.jsx";
-import ruchin from "../assets/ruchin.jpeg"
+import ruchin from "../assets/Ruchin.jpeg"
 function About() {
   const teamMembers = [
     {

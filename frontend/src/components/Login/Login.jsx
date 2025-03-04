@@ -27,17 +27,22 @@ const Login = () => {
     if (response.ok) {
       const text = await response.text();
       const result = text ? JSON.parse(text) : {};
-      localStorage.setItem("user", JSON.stringify(result.user));
-      localStorage.setItem("userToken", result.token);
-      toast.success(`Welcome ${result.user.name}`, { position: "top-right" });
-      navigate("/home");
+      if (result.user) {
+        localStorage.setItem("user", JSON.stringify(result.user));
+        localStorage.setItem("userToken", result.token);
+        toast.success(`Welcome ${result.user.name}`, { position: "top-right" });
+        navigate("/home");
+      } else {
+        toast.error("Invalid response from server.");
+      }
     } else {
       toast.error(result.message || "Invalid email or password!");
     }
   } catch (error) {
     console.error("Error during login:", error);
     toast.error("Failed to login. Please try again later.");
-  }};
+  }
+};
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"

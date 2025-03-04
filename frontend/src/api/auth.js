@@ -1,5 +1,6 @@
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "https://ju-backend.onrender.com";
 
+// http://localhost:5000/api/auth"
 // Signup API Call
 export const signup = async (formData) => {
   try {

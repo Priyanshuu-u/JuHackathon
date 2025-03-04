@@ -16,7 +16,7 @@ const Login = () => {
   };
 
   try {
-    const response = await fetch("https://ju-frontend.onrender.com/login", {
+    const response = await fetch("https://ju-backend.onrender.com/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -8,44 +8,36 @@ import { Link } from "react-router-dom";
 const Login = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = {
-      email: e.target.email.value,
-      password: e.target.password.value,
-    };
-
-    try {
-      const response = await fetch("https://ju-frontend.onrender.com/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-     
-      if (response.ok) {
-        // Save user details and token in localStorage
-         const result = await response.json();
-        localStorage.setItem("user", JSON.stringify(result.user));
-        localStorage.setItem("userToken", result.token);
-
-        // Show success toast with the correct position
-        toast.success(`Welcome ${result.user.name}`, {
-          position: "top-right", // Use string position directly
-        });
-
-        navigate("/home"); // Redirect to Home
-      } else {
-        toast.error(result.message || "Invalid email or password!"); // Show error toast if login fails
-      }
-    } catch (error) {
-      console.error("Error during login:", error);
-      toast.error("Failed to login. Please try again later."); // Show error toast
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const formData = {
+    email: e.target.email.value,
+    password: e.target.password.value,
   };
 
+  try {
+    const response = await fetch("https://ju-frontend.onrender.com/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (response.ok) {
+      const text = await response.text();
+      const result = text ? JSON.parse(text) : {};
+      localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.setItem("userToken", result.token);
+      toast.success(`Welcome ${result.user.name}`, { position: "top-right" });
+      navigate("/home");
+    } else {
+      toast.error(result.message || "Invalid email or password!");
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+    toast.error("Failed to login. Please try again later.");
+  }
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"

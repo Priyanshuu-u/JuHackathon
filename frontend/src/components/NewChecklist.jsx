@@ -137,7 +137,7 @@ const NewChecklist = () => {
     console.log('Submitting Checklist:', checklist);
 
     try {
-      const response = await fetch('http://localhost:5000/api/checklists', {
+      const response = await fetch('https://ju-backend.onrender.com/api/checklists', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

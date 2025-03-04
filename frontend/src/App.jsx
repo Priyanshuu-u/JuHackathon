@@ -12,9 +12,10 @@ import Aarogyam from "./components/Aarogyam";
 import NewChecklist from "./components/NewChecklist";
 import "react-toastify/dist/ReactToastify.css"; // Toast styles
 import ChecklistDetail from "./components/ChecklistDetail";
+import AuthProvider from "./context/AuthContext.jsx
 function App() {
   return (
-    <Router>
+    <AuthProvider>   <Router>
       <div>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -31,6 +32,8 @@ function App() {
         <ToastContainer /> {/* Place ToastContainer here to display toasts */}
       </div>
     </Router>
+      </AuthProvider>
+ 
   );
 }
 

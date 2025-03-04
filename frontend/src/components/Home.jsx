@@ -22,9 +22,10 @@ function Home() {
     { title: 'Post-Surgery Checklist', description: 'Post-surgery care and monitoring.' },
   ];
 
-  return (
+  return (<div>
+    <Navbar />
     <div className="home-container">
-      <Navbar />
+      
       <ToastContainer /> {/* ToastContainer to render toasts */}
 
       <div className="content">
@@ -40,6 +41,7 @@ function Home() {
           ))}
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -22,7 +22,7 @@ const Signup = () => {
   formData.append("photo", selectedFile);
 
   try {
-    const response = await fetch("https://ju-backend.onrender.com/signup", {
+    const response = await fetch("https://ju-backend.onrender.com/api/auth/signup", {
       method: "POST",
       body: formData,
     });

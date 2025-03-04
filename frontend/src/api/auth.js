@@ -1,4 +1,4 @@
-const API_URL = "https://ju-backend.onrender.com";
+const API_URL = "https://ju-backend.onrender.com/api/auth";
 
 // http://localhost:5000/api/auth"
 // Signup API Call

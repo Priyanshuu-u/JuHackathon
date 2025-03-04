@@ -16,7 +16,7 @@ const Login = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("https://ju-frontend.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

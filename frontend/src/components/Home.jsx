@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './Navbar.jsx';
 import { ToastContainer } from 'react-toastify'; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css';
+import './Home.css'; // Import the CSS file
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -15,13 +17,14 @@ function Home() {
   }, []);
 
   return (
-    <div>
+    <div className="home-container">
       <Navbar />
       <ToastContainer /> {/* ToastContainer to render toasts */}
 
       <div className="content">
         <h2>Welcome, {user ? user.name : "Guest"}</h2>
-        {/* The rest of your homepage content */}
+        <p>Explore the amazing features of our platform.</p>
+        <button className="explore-button">Explore Now</button>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ const TeamMemberSearch = ({ addTeamMember }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/checklists/users?search=${searchTerm}`, {
+      const response = await fetch(`https://ju-backend.onrender.com/api/checklists/users?search=${searchTerm}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('userToken')}`,
         },

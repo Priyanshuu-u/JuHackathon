@@ -1,6 +1,6 @@
 import React from 'react';
 import AIChat from './AIChat';
-
+import './Aarogyam.css';
 function Aarogyam() {
   return (
     <div>

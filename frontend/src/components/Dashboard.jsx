@@ -23,7 +23,7 @@ const Dashboard = () => {
 
   const fetchChecklists = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/checklists/users/${userId}`, {
+      const response = await fetch(`https://ju-backend.onrender.com/api/checklists/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('userToken')}`,
         },

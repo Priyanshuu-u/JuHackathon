@@ -16,7 +16,7 @@ const ChecklistDetail = () => {
 
   const fetchChecklistDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/checklists/${checklistId}`, {
+      const response = await fetch(`https://ju-backend.onrender.com/api/checklists/${checklistId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('userToken')}`,
         },

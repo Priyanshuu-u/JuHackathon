@@ -37,7 +37,7 @@ const Login = () => {
   } catch (error) {
     console.error("Error during login:", error);
     toast.error("Failed to login. Please try again later.");
-  }
+  }};
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"

@@ -6,17 +6,7 @@ function About() {
     {
       name: "Priyanshu Rajpurohit",
       college: "JECRC College(B.Tech CSE)",
-      photo: "https://media.licdn.com/dms/image/v2/D5635AQEbPW1vyAodRA/profile-framedphoto-shrink_400_400/B56ZVCio.8GoAc-/0/1740578132267?e=1741716000&v=beta&t=e5oAz9WvvlaeTADIT6pnREtOGs-oJok1zeIxUk-5H2s", // Replace with actual photo URL
-    },
-    {
-      name: "Arpit Pareek",
-      college: "JECRC College(B.Tech CSE)",
-      photo: "https://media.licdn.com/dms/image/v2/D4D03AQHeJsisriWTvA/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1728652192818?e=2147483647&v=beta&t=4TmDcAfeNH2Ym_VgfPso0M8j42xiL2lN4QHz--2zYGw", // Replace with actual photo URL
-    },
-    {
-      name: "Ruchin Sharma",
-      college: "Mahatma Gandhi Medical College(MBBS)",
-      photo: "https://i.ibb.co/yyYr21X/IMG-20250128-WA0007.jpg", // Replace with actual photo URL
+      photo: "https://media.licdn.com/dms/image/v2/D5603AQEAM0MBl-MVPw/profile-displayphoto-scale_400_400/B56ZmgG2xXJ8Ag-/0/1759327777970?e=2147483647&v=beta&t=u_wvOGYv-utVa2LX1QbelInh5-lTE538xS4ir2e8h4s", // Replace with actual photo URL
     },
   ];
 

@@ -10,12 +10,16 @@ if (!apiKey) {
 const configuration = new Configuration({ apiKey });
 const openai = new OpenAIApi(configuration);
 
+// POST /api/chat
 router.post('/', async (req, res) => {
   try {
     const { message } = req.body || {};
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'message (string) is required in request body' });
     }
+
+    // optional: basic logging to help debug
+    console.log('[api/chat] message:', message);
 
     const messages = [
       { role: 'system', content: 'You are Aarogyam Assistant. Provide concise, medically-sensible guidance and triage advice. Use disclaimers where appropriate.' },
@@ -30,10 +34,10 @@ router.post('/', async (req, res) => {
     });
 
     const reply = completion?.data?.choices?.[0]?.message?.content?.trim() || 'I could not generate a response.';
-    res.json({ reply });
+    return res.json({ reply });
   } catch (err) {
     console.error('/api/chat error:', err?.response?.data || err.message || err);
-    res.status(500).json({ error: 'AI service error' });
+    return res.status(500).json({ error: 'AI service error' });
   }
 });
 

@@ -1,52 +1,30 @@
 import React from 'react';
-import '../App.css'
+import '../App.css';
 import { Link } from "react-router-dom";
+import Logo from "../assets/Mednova.png";
 
 function Navbar() {
   return (
-    <>
-      <div className="navbar bg-cyan-600 text-white text-2xl shadow-sm">
-        <div className="navbar-start">
-          <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h8m-8 6h16"
-                />
-              </svg>
-            </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-              <li><Link to="/dashboard">DashBoard</Link></li>
-              <li><Link to="/about">About</Link></li>
-              <li><Link to="/medi-mitra">Medi-Mitra</Link></li>
-              <li><Link to="/aarogyam">Aarogyam</Link></li>
-            </ul>
-          </div>
-          <Link to="/" className="btn btn-ghost text-xl">MedNova</Link>
-        </div>
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            <li><Link to="/dashboard">DashBoard</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/medi-mitra">Medi-Mitra</Link></li>
-            <li><Link to="/aarogyam">Aarogyam</Link></li>
-          </ul>
-        </div>
-        <div className="navbar-end">
-          <Link to="/new-checklist" className="btn">New Checklist</Link>
+    <header className="app-navbar app-container">
+      <div className="app-logo">
+        <img src={Logo} alt="MedNova" />
+        <div>
+          <div className="app-brand">MedNova</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Care • Triage • Assist</div>
         </div>
       </div>
-    </>
+
+      <nav style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+        <Link to="/dashboard" className="btn-ghost">Dashboard</Link>
+        <Link to="/medi-mitra" className="btn-ghost">Medi-Mitra</Link>
+        <Link to="/aarogyam" className="btn-ghost">Aarogyam</Link>
+        <Link to="/about" className="btn-ghost">About</Link>
+      </nav>
+
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <Link to="/new-checklist" className="btn-primary">New Checklist</Link>
+      </div>
+    </header>
   );
 }
 

@@ -27,10 +27,22 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded files
 
+// ...existing imports and middleware
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/checklists", checklistRoutes);
 app.use("/api/chat", chatRoutes); // <--- mount the chat route
+
+// If you build your frontend into a folder (e.g. ../frontend/build), serve it and handle SPA routing:
+import express from 'express';
+const clientBuildPath = path.join(__dirname, '..', 'frontend', 'build');
+if (fs.existsSync(clientBuildPath)) {
+  app.use(express.static(clientBuildPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
 // Start server
 const PORT = process.env.PORT || 5555;

@@ -19,7 +19,9 @@ export default function Chatbot(){
     setInput('');
     setLoading(true);
     try {
-      const res = await axios.post('/api/chat', { message: text });
+      // Use the absolute backend URL (or replace with a client env var)
+      const BACKEND = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'https://ju-backend.onrender.com';
+      const res = await axios.post(`${BACKEND}/api/chat`, { message: text });
       const reply = res.data?.reply || 'Sorry, something went wrong.';
       setMessages(prev => [...prev, { role: 'bot', text: reply }]);
     } catch (err) {

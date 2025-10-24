@@ -9,39 +9,49 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 // Gemini config (for fallback)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash'; // last segment only
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 const GEMINI_API_BASE = process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta';
 
 console.log('Startup: OPENAI_API_KEY present?:', !!OPENAI_API_KEY);
 console.log('Startup: GEMINI_API_KEY present?:', !!GEMINI_API_KEY);
 
-/**
- * Helper: call Gemini REST API using server-side API key (updated payload to avoid invalid fields)
- */
+/** minimal extractor copied from gemini route to keep consistent behaviour */
+function extractTextFromGeminiResponse(data) {
+  if (!data) return null;
+  const candidate = data?.candidates?.[0];
+  if (candidate) {
+    if (typeof candidate.output === 'string') return candidate.output.trim();
+    const content = candidate.content;
+    if (content) {
+      if (Array.isArray(content)) {
+        return content.map(c => (typeof c === 'string' ? c : c?.text ?? c?.output ?? JSON.stringify(c))).join('\n').trim();
+      }
+      if (content?.parts && Array.isArray(content.parts)) return content.parts.map(p => p?.text ?? p?.output ?? JSON.stringify(p)).join('').trim();
+      if (typeof content.text === 'string') return content.text.trim();
+      if (typeof content.output === 'string') return content.output.trim();
+      return JSON.stringify(content);
+    }
+    if (typeof candidate.text === 'string') return candidate.text.trim();
+  }
+  if (Array.isArray(data?.outputs) && typeof data.outputs[0] === 'string') return data.outputs[0].trim();
+  if (Array.isArray(data?.result) && data.result[0]?.content) {
+    const resContent = data.result[0].content;
+    if (Array.isArray(resContent)) return resContent.map(c => c?.text ?? c?.output ?? JSON.stringify(c)).join('\n').trim();
+    return JSON.stringify(resContent);
+  }
+  return JSON.stringify(data);
+}
+
+/** call Gemini (used as fallback) */
 async function callGemini(message) {
   if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
-
   const modelSegment = encodeURIComponent(GEMINI_MODEL.split('/').pop());
   const url = `${GEMINI_API_BASE}/models/${modelSegment}:generateContent`;
-
-  // Use the body shape that the generative API expects for generateContent
-  const body = {
-    contents: [
-      {
-        parts: [{ text: message }]
-      }
-    ]
-    // NOTE: removed temperature / maxOutputTokens here because they caused INVALID_ARGUMENT errors.
-    // If you need generation controls, verify the correct parameter names for your API version
-    // and add them in the exact shape the docs require.
-  };
+  const body = { contents: [{ parts: [{ text: message }] }] };
 
   const r = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-goog-api-key': GEMINI_API_KEY
-    },
+    headers: { 'Content-Type': 'application/json', 'X-goog-api-key': GEMINI_API_KEY },
     body: JSON.stringify(body)
   });
 
@@ -52,33 +62,9 @@ async function callGemini(message) {
     err.data = data;
     throw err;
   }
-
-  const candidate = data?.candidates?.[0];
-  let reply = null;
-  if (candidate) {
-    if (typeof candidate.output === 'string') {
-      reply = candidate.output;
-    } else if (candidate.content && Array.isArray(candidate.content)) {
-      reply = candidate.content.map((c) => (c?.text ?? c?.output ?? JSON.stringify(c))).join('\n');
-    } else if (typeof candidate.text === 'string') {
-      reply = candidate.text;
-    }
-  }
-
-  if (!reply) {
-    reply =
-      data?.result?.[0]?.content ||
-      (Array.isArray(data?.outputs) && data.outputs[0]) ||
-      JSON.stringify(data);
-  }
-
-  return reply;
+  return extractTextFromGeminiResponse(data) ?? JSON.stringify(data);
 }
 
-/**
- * POST /api/chat
- * Tries OpenAI first; on quota (429) falls back to Gemini.
- */
 router.post('/', async (req, res) => {
   try {
     const { message } = req.body || {};
@@ -104,7 +90,6 @@ router.post('/', async (req, res) => {
         const reply = completion?.choices?.[0]?.message?.content?.trim() || 'I could not generate a response.';
         return res.json({ reply });
       } catch (err) {
-        // Inspect OpenAI error. If quota-related, fall back to Gemini.
         const status = err?.response?.status;
         const data = err?.response?.data ?? err?.message ?? String(err);
         console.error('/api/chat OpenAI error - status:', status, 'data:', data);
@@ -115,17 +100,15 @@ router.post('/', async (req, res) => {
           (data && data?.message && typeof data.message === 'string' && data.message.toLowerCase().includes('quota'));
 
         if (!isQuotaError) {
-          // Non-quota OpenAI error: return info to client
           return res.status(500).json({ error: 'AI service error', details: { status, data } });
         }
-
         console.log('Falling back to Gemini due to OpenAI quota error');
       }
     } else {
       console.log('OPENAI_API_KEY not set; using Gemini (if configured)');
     }
 
-    // Gemini fallback (or primary if OpenAI absent)
+    // Gemini fallback
     try {
       const geminiReply = await callGemini(message);
       return res.json({ reply: String(geminiReply) });

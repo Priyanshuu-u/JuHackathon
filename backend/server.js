@@ -35,7 +35,7 @@ app.use("/api/checklists", checklistRoutes);
 app.use("/api/chat", chatRoutes); // <--- mount the chat route
 
 // If you build your frontend into a folder (e.g. ../frontend/build), serve it and handle SPA routing:
-import express from 'express';
+
 const clientBuildPath = path.join(__dirname, '..', 'frontend', 'build');
 if (fs.existsSync(clientBuildPath)) {
   app.use(express.static(clientBuildPath));

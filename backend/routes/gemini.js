@@ -4,16 +4,12 @@ const router = express.Router();
 
 // Configuration from environment
 const API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = process.env.GEMINI_MODEL || 'models/gemini-2.0-flash'; // change if needed
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash'; // just the model id segment is fine
 const API_BASE = process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta';
 
-// NOTE: Do not log the secret value itself in production.
 console.log('GEMINI_API_KEY present?:', !!API_KEY);
 if (!API_KEY) {
   console.warn('GEMINI_API_KEY not set; /api/gemini will fail until configured');
-}
-if (!MODEL) {
-  console.warn('GEMINI_MODEL not set; using default:', MODEL);
 }
 
 /**
@@ -27,11 +23,11 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'message (string) is required in request body' });
     }
 
-    // Build URL: e.g.
-    // https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=API_KEY
-    const url = `${API_BASE}/models/${encodeURIComponent(MODEL.split('/').pop())}:generateContent?key=${encodeURIComponent(API_KEY)}`;
+    // Build URL for generateContent (we will use X-goog-api-key header)
+    const modelSegment = encodeURIComponent(MODEL.split('/').pop());
+    const url = `${API_BASE}/models/${modelSegment}:generateContent`;
 
-    // Request body shape for generateContent: use "contents" array with parts -> text
+    // Use the request body shape that your working curl used: contents -> parts -> text
     const body = {
       contents: [
         {
@@ -41,20 +37,19 @@ router.post('/', async (req, res) => {
             }
           ]
         }
-      ],
-      // Optional generation parameters - adjust as desired
-      // Note: different API versions may use different names for parameters
-      // (e.g., temperature / maxOutputTokens). Adjust based on responses.
-      temperature: 0.2,
-      maxOutputTokens: 600
+      ]
+      // NOTE: removed temperature/maxOutputTokens here because this API surface (generateContent)
+      // returned "Unknown name" errors for those fields in your logs.
+      // If you later want to pass generation controls, consult the exact API version docs
+      // and add the allowed fields in the correct names/structure.
     };
 
     const r = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // If your API key method requires X-goog-api-key, uncomment next line and remove key param in URL.
-        // 'X-goog-api-key': API_KEY
+        // Prefer sending API key in header; some keys also accept ?key= in URL if you prefer
+        'X-goog-api-key': API_KEY
       },
       body: JSON.stringify(body)
     });
@@ -66,18 +61,30 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'Gemini API error', status: r.status, details: data });
     }
 
-    // Typical response contains candidates with generated text, e.g.:
-    // { candidates: [ { output: "..." }, ... ] }
-    // Or the response may vary by API version - try common keys:
-    const candidateOutput =
-      data?.candidates?.[0]?.output ||
-      data?.candidates?.[0]?.content ||
-      data?.candidates?.[0]?.text ||
-      data?.result?.[0]?.content ||
-      (Array.isArray(data?.outputs) && data.outputs[0]) ||
-      null;
+    // Extract likely reply shapes:
+    // - data.candidates[0].output (string)
+    // - data.candidates[0].content -> array of parts with .text
+    // - other shapes: fall back to stringifying response
+    const candidate = data?.candidates?.[0];
+    let reply = null;
+    if (candidate) {
+      if (typeof candidate.output === 'string') {
+        reply = candidate.output;
+      } else if (candidate.content && Array.isArray(candidate.content)) {
+        // join any text segments into a single string
+        reply = candidate.content.map((c) => (c?.text ?? c?.output ?? JSON.stringify(c))).join('\n');
+      } else if (typeof candidate.text === 'string') {
+        reply = candidate.text;
+      }
+    }
 
-    const reply = candidateOutput ?? JSON.stringify(data);
+    if (!reply) {
+      // fallback: try older/other fields
+      reply =
+        data?.result?.[0]?.content ||
+        (Array.isArray(data?.outputs) && data.outputs[0]) ||
+        JSON.stringify(data);
+    }
 
     return res.json({ reply });
   } catch (err) {

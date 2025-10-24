@@ -3,8 +3,9 @@ import OpenAI from 'openai';
 
 const router = express.Router();
 
+// NOTE: this logs only presence, not the key value.
 const apiKey = process.env.OPENAI_API_KEY;
-console.log('Startup: OPENAI_API_KEY present?:', !!apiKey); // TEMP: log presence only
+console.log('Startup: OPENAI_API_KEY present?:', !!apiKey);
 if (!apiKey) {
   console.warn('OPENAI_API_KEY not set; /api/chat will fail until configured');
 }
@@ -17,7 +18,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'message (string) is required in request body' });
     }
 
-    console.log('[api/chat] incoming message:', message);
+    console.log('[api/chat] incoming message (truncated):', message.slice(0, 200));
 
     const messages = [
       { role: 'system', content: 'You are Aarogyam Assistant. Provide concise, medically-sensible guidance and triage advice. Use disclaimers where appropriate.' },
@@ -37,9 +38,17 @@ router.post('/', async (req, res) => {
 
     return res.json({ reply });
   } catch (err) {
-    // Log more robust error info for debugging (but DO NOT log the API key)
-    console.error('/api/chat error:', err?.response?.status, err?.response?.data ?? err?.message ?? err);
-    return res.status(500).json({ error: 'AI service error' });
+    // Log richer debug info (DO NOT log the API key). This prints status and body from OpenAI if present.
+    const status = err?.response?.status;
+    const data = err?.response?.data;
+    console.error('/api/chat error - status:', status, 'data:', data ?? err?.message ?? err);
+
+    // For debugging, return the status/data from upstream (safe to reveal for now).
+    // Remove or reduce this before production to avoid leaking provider details.
+    return res.status(500).json({
+      error: 'AI service error',
+      details: data ? { status, data } : { message: err?.message }
+    });
   }
 });
 

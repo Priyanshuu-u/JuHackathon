@@ -8,7 +8,8 @@ import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import checklistRoutes from "./routes/checklistRoutes.js";
-import chatRoutes from "./routes/chat.js"; // <--- new import
+import chatRoutes from "./routes/chat.js"; // existing
+import geminiRoutes from "./routes/gemini.js"; // <-- new import
 
 // Load environment variables
 dotenv.config();
@@ -31,7 +32,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve u
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/checklists", checklistRoutes);
-app.use("/api/chat", chatRoutes); // <--- mount the chat route
+app.use("/api/chat", chatRoutes); // mount the existing chat route
+app.use("/api/gemini", geminiRoutes); // <-- mount the new Gemini route
 
 // Serve frontend build (if present) and handle SPA routing.
 // Adjust the clientBuildPath if your frontend build is in a different location

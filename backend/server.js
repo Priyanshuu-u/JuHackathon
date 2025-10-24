@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -27,21 +28,29 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded files
 
-// ...existing imports and middleware
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/checklists", checklistRoutes);
 app.use("/api/chat", chatRoutes); // <--- mount the chat route
 
-// If you build your frontend into a folder (e.g. ../frontend/build), serve it and handle SPA routing:
-
-const clientBuildPath = path.join(__dirname, '..', 'frontend', 'build');
+// Serve frontend build (if present) and handle SPA routing.
+// Adjust the clientBuildPath if your frontend build is in a different location
+// (e.g. ../client/build, ../frontend/build, or ./public). This only runs when
+// the build folder exists on the same service as the backend.
+const clientBuildPath = path.join(__dirname, "..", "frontend", "build");
 if (fs.existsSync(clientBuildPath)) {
+  console.log("Serving frontend from", clientBuildPath);
   app.use(express.static(clientBuildPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  // Send index.html for all non-API routes so client-side router can handle them
+  app.get("*", (req, res) => {
+    // If the request is for an API route, skip this handler
+    if (req.path.startsWith("/api/")) {
+      return res.status(404).json({ error: "API route not found" });
+    }
+    res.sendFile(path.join(clientBuildPath, "index.html"));
   });
+} else {
+  console.log("No frontend build found at", clientBuildPath, "- skipping static serving");
 }
 
 // Start server

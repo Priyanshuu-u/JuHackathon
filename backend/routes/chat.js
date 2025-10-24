@@ -12,35 +12,35 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash'; // last segment only
 const GEMINI_API_BASE = process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta';
 
-// Log presence only (do NOT log secrets)
 console.log('Startup: OPENAI_API_KEY present?:', !!OPENAI_API_KEY);
 console.log('Startup: GEMINI_API_KEY present?:', !!GEMINI_API_KEY);
 
 /**
- * Helper: call Gemini REST API using server-side API key
+ * Helper: call Gemini REST API using server-side API key (updated payload to avoid invalid fields)
  */
 async function callGemini(message) {
   if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
 
   const modelSegment = encodeURIComponent(GEMINI_MODEL.split('/').pop());
-  const url = `${GEMINI_API_BASE}/models/${modelSegment}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  const url = `${GEMINI_API_BASE}/models/${modelSegment}:generateContent`;
 
+  // Use the body shape that the generative API expects for generateContent
   const body = {
     contents: [
       {
         parts: [{ text: message }]
       }
-    ],
-    temperature: 0.2,
-    maxOutputTokens: 600
+    ]
+    // NOTE: removed temperature / maxOutputTokens here because they caused INVALID_ARGUMENT errors.
+    // If you need generation controls, verify the correct parameter names for your API version
+    // and add them in the exact shape the docs require.
   };
 
   const r = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
-      // If your key requires X-goog-api-key header instead, use:
-      // 'X-goog-api-key': GEMINI_API_KEY
+      'Content-Type': 'application/json',
+      'X-goog-api-key': GEMINI_API_KEY
     },
     body: JSON.stringify(body)
   });
@@ -53,21 +53,31 @@ async function callGemini(message) {
     throw err;
   }
 
-  // Extract common response shapes (adjust if your API returns different fields)
-  const candidateOutput =
-    data?.candidates?.[0]?.output ||
-    data?.candidates?.[0]?.content ||
-    data?.candidates?.[0]?.text ||
-    data?.result?.[0]?.content ||
-    (Array.isArray(data?.outputs) && data.outputs[0]) ||
-    null;
+  const candidate = data?.candidates?.[0];
+  let reply = null;
+  if (candidate) {
+    if (typeof candidate.output === 'string') {
+      reply = candidate.output;
+    } else if (candidate.content && Array.isArray(candidate.content)) {
+      reply = candidate.content.map((c) => (c?.text ?? c?.output ?? JSON.stringify(c))).join('\n');
+    } else if (typeof candidate.text === 'string') {
+      reply = candidate.text;
+    }
+  }
 
-  return candidateOutput ?? JSON.stringify(data);
+  if (!reply) {
+    reply =
+      data?.result?.[0]?.content ||
+      (Array.isArray(data?.outputs) && data.outputs[0]) ||
+      JSON.stringify(data);
+  }
+
+  return reply;
 }
 
 /**
  * POST /api/chat
- * Tries OpenAI first; on quota (429) or quota message, falls back to Gemini.
+ * Tries OpenAI first; on quota (429) falls back to Gemini.
  */
 router.post('/', async (req, res) => {
   try {
@@ -105,11 +115,10 @@ router.post('/', async (req, res) => {
           (data && data?.message && typeof data.message === 'string' && data.message.toLowerCase().includes('quota'));
 
         if (!isQuotaError) {
-          // Non-quota OpenAI error: return info to client (you can change this behavior)
+          // Non-quota OpenAI error: return info to client
           return res.status(500).json({ error: 'AI service error', details: { status, data } });
         }
 
-        // else fall through to Gemini fallback
         console.log('Falling back to Gemini due to OpenAI quota error');
       }
     } else {

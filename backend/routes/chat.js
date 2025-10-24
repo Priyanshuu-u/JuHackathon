@@ -4,6 +4,7 @@ import OpenAI from 'openai';
 const router = express.Router();
 
 const apiKey = process.env.OPENAI_API_KEY;
+console.log('Startup: OPENAI_API_KEY present?:', !!apiKey); // TEMP: log presence only
 if (!apiKey) {
   console.warn('OPENAI_API_KEY not set; /api/chat will fail until configured');
 }
@@ -23,7 +24,6 @@ router.post('/', async (req, res) => {
       { role: 'user', content: message }
     ];
 
-    // Using the modern OpenAI Node client (openai@4.x) interface
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages,
@@ -37,7 +37,8 @@ router.post('/', async (req, res) => {
 
     return res.json({ reply });
   } catch (err) {
-    console.error('/api/chat error:', err?.response?.data || err.message || err);
+    // Log more robust error info for debugging (but DO NOT log the API key)
+    console.error('/api/chat error:', err?.response?.status, err?.response?.data ?? err?.message ?? err);
     return res.status(500).json({ error: 'AI service error' });
   }
 });
